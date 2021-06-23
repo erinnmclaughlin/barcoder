@@ -7,36 +7,21 @@ namespace Barcoder.DataMatrix
 {
     public static class DataMatrixEncoder
     {
-        public static IBarcode Encode(string content, int? fixedNumberOfRows = null, bool gs1ModeEnabled = false)
+        public static IBarcode Encode(string content, CodeSizes? codeSize = null, bool gs1ModeEnabled = false)
         {
-            var data = gs1ModeEnabled
-                ? EncodeGs1(content)
-                : EncodeText(content);
-
-            CodeSize size = fixedNumberOfRows.HasValue
-                ? GetFixedCodeSizeForData(fixedNumberOfRows.Value, data.Length)
-                : GetSmallestCodeSizeForData(data.Length);
+            var data = gs1ModeEnabled ? EncodeGs1(content) : EncodeText(content);
+            CodeSize size = codeSize.HasValue ? codeSize.Value.GetCodeSize() : GetSmallestCodeSizeForData(data.Length);
 
             data = AddPadding(data, size.DataCodewords);
             data = ErrorCorrection.CalculateEcc(data, size);
-            var code = Render(data, size)
-                ?? throw new InvalidOperationException("Unable to render barcode");
+            DataMatrixCode code = Render(data, size) ?? throw new InvalidOperationException("Unable to render barcode");
             code.Content = content;
             return code;
         }
 
-        private static CodeSize GetFixedCodeSizeForData(int fixedNumberOfRows, int dataLength)
-        {
-            CodeSize codeSize = CodeSizes.All.FirstOrDefault(x => x.Rows == fixedNumberOfRows)
-                ?? throw new InvalidOperationException($"No code size found with fixed number of rows {fixedNumberOfRows}");
-            if (codeSize.DataCodewords < dataLength)
-                throw new InvalidOperationException($"The fixed code size does not fit {dataLength} codewords");
-            return codeSize;
-        }
-
         private static CodeSize GetSmallestCodeSizeForData(int dataLength)
         {
-            return CodeSizes.All.FirstOrDefault(x => x.DataCodewords >= dataLength)
+            return Enum.GetValues(typeof(CodeSizes)).Cast<CodeSizes>().Select(x => x.GetCodeSize()).FirstOrDefault(x => x.DataCodewords >= dataLength)
                 ?? throw new InvalidOperationException($"No code size found that fits {dataLength} codewords");
         }
 

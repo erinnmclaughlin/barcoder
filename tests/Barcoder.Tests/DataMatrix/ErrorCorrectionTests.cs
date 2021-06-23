@@ -15,7 +15,8 @@ namespace Barcoder.Tests.DataMatrix
         public void CalculateEccOfData_ShouldReturnCorrectEccForGivenData(byte[] data, byte[] expectedResult)
         {
             // Arrange
-            CodeSize size = CodeSizes.All.FirstOrDefault(x => x.DataCodewords >= data.Length)
+            CodeSize size = Enum.GetValues(typeof(CodeSizes)).Cast<CodeSizes>().Select(x => x.GetCodeSize())
+                .FirstOrDefault(x => x.DataCodewords >= data.Length)
                 ?? throw new InvalidOperationException("Size not found");
 
             // Act

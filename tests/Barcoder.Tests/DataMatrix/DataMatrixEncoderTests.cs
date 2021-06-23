@@ -90,7 +90,7 @@ namespace Barcoder.Tests.DataMatrix
             ");
 
             // Act
-            var dataMatrix = DataMatrixEncoder.Encode(content, fixedNumberOfRows: 14) as DataMatrixCode;
+            var dataMatrix = DataMatrixEncoder.Encode(content, CodeSizes.DM_14x14) as DataMatrixCode;
 
             // Assert
             dataMatrix.Should().NotBeNull();
