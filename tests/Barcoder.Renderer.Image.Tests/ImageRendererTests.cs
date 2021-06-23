@@ -7,6 +7,7 @@ using Barcoder.Renderers;
 using FluentAssertions;
 using Moq;
 using SixLabors.ImageSharp.Formats;
+using SixLabors.ImageSharp.PixelFormats;
 using Xunit;
 using ImageSharp = SixLabors.ImageSharp;
 
@@ -116,6 +117,23 @@ namespace Barcoder.Renderer.Image.Tests
 
             // Act
             renderer.Render(barcode, stream);
+
+            // Assert
+            stream.Position = 0;
+            using var image = ImageSharp.Image.Load(stream, out IImageFormat imageFormat);
+            imageFormat.Name.Should().Be("JPEG");
+        }
+
+        [Fact]
+        public void RenderT_ImageFormatJpeg_ShouldRenderJpeg()
+        {
+            // Arrange
+            var renderer = new ImageRenderer(imageFormat: ImageFormat.Jpeg);
+            IBarcode barcode = QrEncoder.Encode("Hello", ErrorCorrectionLevel.L, Encoding.Unicode);
+            using var stream = new MemoryStream();
+
+            // Act
+            renderer.Render(barcode, stream, new Rgb24(233,0,0), new Rgb24(0, 169, 233));
 
             // Assert
             stream.Position = 0;

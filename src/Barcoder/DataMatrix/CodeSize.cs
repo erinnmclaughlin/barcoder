@@ -40,23 +40,4 @@ namespace Barcoder.DataMatrix
 
         public int ErrorCorrectionCodewordsPerBlock => EccCount / BlockCount;
     }
-
-    //internal static class CodeSizes
-    //{
-    //    public static readonly CodeSize[] All = new[]
-    //    {
-    //        new CodeSize(96, 96, 4, 4, 272, 4),
-    //        new CodeSize(104, 104, 4, 4, 336, 6),
-    //        new CodeSize(120, 120, 6, 6, 408, 6),
-    //        new CodeSize(132, 132, 6, 6, 496, 8),
-    //        new CodeSize(144, 144, 6, 6, 620, 10),
-
-    //        new CodeSize(8, 18, 1, 1, 7, 1),
-    //        new CodeSize(8, 32, 2, 1, 11, 1),
-    //        new CodeSize(12, 26, 1, 1, 14, 1),
-    //        new CodeSize(12, 36, 2, 1, 18, 1),
-    //        new CodeSize(16, 36, 2, 1, 24, 1),
-    //        new CodeSize(16, 48, 2, 1, 28, 1)
-    //    };
-    //}
 }

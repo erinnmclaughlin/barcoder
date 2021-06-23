@@ -58,10 +58,22 @@ namespace Barcoder.Renderer.Image
         {
             barcode = barcode ?? throw new ArgumentNullException(nameof(barcode));
             outputStream = outputStream ?? throw new ArgumentNullException(nameof(outputStream));
+
             if (barcode.Bounds.Y == 1)
                 Render1D(barcode, outputStream);
             else if (barcode.Bounds.Y > 1)
-                Render2D(barcode, outputStream);
+                Render2D<Gray8>(barcode, outputStream);
+            else
+                throw new NotSupportedException($"Y value of {barcode.Bounds.Y} is invalid");
+        }
+
+        public void Render<T>(IBarcode barcode, Stream outputStream, T black, T white, int? margin = null) where T : struct, IPixel, IPixel<T>
+        {
+            barcode = barcode ?? throw new ArgumentNullException(nameof(barcode));
+            outputStream = outputStream ?? throw new ArgumentNullException(nameof(outputStream));
+
+            if (barcode.Bounds.Y > 1)
+                Render2D<T>(barcode, outputStream, black, white, margin);
             else
                 throw new NotSupportedException($"Y value of {barcode.Bounds.Y} is invalid");
         }
@@ -96,27 +108,28 @@ namespace Barcoder.Renderer.Image
             }
         }
 
-        private void Render2D(IBarcode barcode, Stream outputStream)
+        private void Render2D<T>(IBarcode barcode, Stream outputStream, T? black = null, T? white = null, int? marginOverride = null) where T : struct, IPixel, IPixel<T>
         {
-            int width = (barcode.Bounds.X + 2 * barcode.Margin) * _pixelSize;
-            int height = (barcode.Bounds.Y + 2 * barcode.Margin) * _pixelSize;
+            int margin = marginOverride ?? barcode.Margin;
+            int width = (barcode.Bounds.X + 2 * margin) * _pixelSize;
+            int height = (barcode.Bounds.Y + 2 * margin) * _pixelSize;
 
-            using (var image = new Image<Gray8>(width, height))
+            using (var image = new Image<T>(width, height))
             {
                 image.Mutate(ctx =>
                 {
-                    ctx.Fill(NamedColors<Gray8>.White);
+                    ctx.Fill(white ?? NamedColors<T>.White);
                     for (var y = 0; y < barcode.Bounds.Y; y++)
                     {
                         for (var x = 0; x < barcode.Bounds.X; x++)
                         {
                             if (!barcode.At(x, y)) continue;
                             ctx.FillPolygon(
-                                NamedColors<Gray8>.Black,
-                                new Vector2((barcode.Margin + x) * _pixelSize, (barcode.Margin + y) * _pixelSize),
-                                new Vector2((barcode.Margin + x + 1) * _pixelSize, (barcode.Margin + y) * _pixelSize),
-                                new Vector2((barcode.Margin + x + 1) * _pixelSize, (barcode.Margin + y + 1) * _pixelSize),
-                                new Vector2((barcode.Margin + x) * _pixelSize, (barcode.Margin + y + 1) * _pixelSize));
+                                black ?? NamedColors<T>.Black,
+                                new Vector2((margin + x) * _pixelSize, (margin + y) * _pixelSize),
+                                new Vector2((margin + x + 1) * _pixelSize, (margin + y) * _pixelSize),
+                                new Vector2((margin + x + 1) * _pixelSize, (margin + y + 1) * _pixelSize),
+                                new Vector2((margin + x) * _pixelSize, (margin + y + 1) * _pixelSize));
                         }
                     }
                 });

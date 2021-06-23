@@ -10,7 +10,7 @@ namespace Barcoder.DataMatrix
         public static IBarcode Encode(string content, CodeSizes? codeSize = null, bool gs1ModeEnabled = false)
         {
             var data = gs1ModeEnabled ? EncodeGs1(content) : EncodeText(content);
-            CodeSize size = codeSize.HasValue ? codeSize.Value.GetCodeSize() : GetSmallestCodeSizeForData(data.Length);
+            CodeSize size = codeSize?.GetCodeSize() ?? GetSmallestCodeSizeForData(data.Length);
 
             data = AddPadding(data, size.DataCodewords);
             data = ErrorCorrection.CalculateEcc(data, size);
